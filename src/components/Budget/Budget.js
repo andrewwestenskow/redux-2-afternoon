@@ -8,25 +8,33 @@ import Loading from './../shared/Loading/Loading';
 import Nav from './../shared/Nav';
 import './Budget.css';
 import {connect} from 'react-redux'
+import {requestUserData} from './../../ducks/usersReducer'
+import {requestBudgetData, addPurchase, removePurchase} from './../../ducks/budgetReducer'
 
 
 class Budget extends Component {
 
+  componentDidMount(){
+    this.props.requestUserData()
+    this.props.requestBudgetData()
+  }
+
   render() {
-    console.log(this.props)
+    const {firstName, lastName} = this.props.users
+    const {purchases, budgetLimit} = this.props.budget
     return (
       <Background>
-        {this.props.loading ? <Loading /> : null}
+        {this.props.budget.loading ? <Loading /> : null}
         <div className='budget-container'>
-          <Nav />
+          <Nav firstName={firstName} lastName={lastName} />
           <div className='content-container'>
             <div className="purchases-container">
-              <AddPurchase />
-              <DisplayPurchases />
+              <AddPurchase addPurchase={addPurchase}/>
+              <DisplayPurchases purchases={purchases} removePurchase={removePurchase}/>
             </div>
             <div className='chart-container'>
-              <Chart1 />
-              <Chart2 />
+              <Chart1 purchases={purchases} budgetLimit={budgetLimit} />
+              <Chart2 purchases={purchases} />
             </div>
           </div>
         </div>
@@ -36,7 +44,10 @@ class Budget extends Component {
 }
 
 function mapStateToProps(state){
-  return state.budget
+  return {
+    budget: state.budget,
+    users: state.users
+  }
 }
 
-export default connect(mapStateToProps)(Budget);
+export default connect(mapStateToProps, {requestUserData, requestBudgetData, addPurchase, removePurchase})(Budget);
